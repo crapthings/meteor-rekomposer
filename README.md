@@ -22,3 +22,9 @@ https://neoziro.github.io/recompact/
 ### REACT-KOMPOSER APIs
 
 https://github.com/arunoda/react-komposer
+
+### ALTERNATIVES for Meteor Tracker
+
+> react-meteor-data
+
+https://github.com/meteor/react-packages/tree/devel/packages/react-meteor-data
