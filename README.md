@@ -11,10 +11,14 @@ its a Drop-in replacement for react-komposer.
 npm i -S react @crapthings/meteor-rekomposer
 ```
 
+### DEMO
+
+https://github.com/crapthings/meteor-rekomposer-demo
+
 ### RECOMPACT APIs
 
 https://neoziro.github.io/recompact/
 
-### KOMPOSER APIs
+### REACT-KOMPOSER APIs
 
 https://github.com/arunoda/react-komposer
