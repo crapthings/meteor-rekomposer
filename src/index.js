@@ -22,18 +22,25 @@ let _defaults = {
   errorHandler,
   pure: false,
   env: {},
+  autoUnsub: true,
 }
 
 recompact.setDefaults = defaults => Object.assign({}, _defaults, defaults)
+
+const autoUnsub = (handler, subscriptions) => {
+  for (const subscriptionId in subscriptions) {
+    const subscription = subscriptions[subscriptionId]
+    const { readyDeps: { _dependentsById } } = subscription
+    if (!_dependentsById.hasOwnProperty(handler._id)) continue
+    subscription.readyDeps._dependentsById[handler._id].stop()
+  }
+}
 
 //
 
 const initialState = withState(WITH_STATE_PROPS[0], WITH_STATE_PROPS[1], false)
 
 const trackReactiveSource = (tracker, options) => lifecycle({
-  componentWillMount() {
-  },
-
   componentWillReceiveProps(nextProps) {
     if (isEqual(omit(this.props, WITH_STATE_PROPS), omit(nextProps, WITH_STATE_PROPS))) return
     this.trackerHandler = tracker(this.props, this._onData, { ..._defaults.env })
@@ -43,28 +50,34 @@ const trackReactiveSource = (tracker, options) => lifecycle({
     if (options.shouldUpdate)
       return options.shouldUpdate(this.props, nextProps, this.state, nextState)
 
-    if (!_defaults.pure)
+    if (options.pure || !_defaults.pure)
       return true
 
     return !isEqual(this.props, nextProps) || !isEqual(this.state, nextState)
   },
 
   componentDidMount() {
-    this._onData = (err, nextProps) => err
-      ? this.props._setWithTrackerState(err)
-      : this.setState(nextProps, () => this.props._setWithTrackerState(true))
+    Meteor.defer(() => {
+      this._onData = (err, nextProps) => err
+        ? this.props._setWithTrackerState(err)
+        : this.setState(nextProps, () => this.props._setWithTrackerState(true))
 
-    this.handler = Tracker.nonreactive(() => Tracker.autorun(() => {
-      this.trackerHandler = tracker(this.props, this._onData, { ..._defaults.env })
-    }))
+      this.handler = Tracker.nonreactive(() => Tracker.autorun(c => {
+        this.trackerHandler = tracker(this.props, this._onData, { ..._defaults.env })
+      }))
+    })
   },
 
   componentWillUnmount() {
-    const { trackerHandler, handler } = this
-    if (typeof trackerHandler === 'function' && trackerHandler.name !== '_onData')
-      trackerHandler()
+    if (!this.handler) return
 
-    handler && handler.stop()
+    this.handler.stop()
+
+    if (typeof this.trackerHandler === 'function' && this.trackerHandler.name !== '_onData')
+      this.trackerHandler()
+
+    if (options.autoUnsub || _defaults.autoUnsub)
+      autoUnsub(this.handler, Meteor.connection._subscriptions)
   },
 })
 
