@@ -28,3 +28,17 @@ https://github.com/arunoda/react-komposer
 > react-meteor-data
 
 https://github.com/meteor/react-packages/tree/devel/packages/react-meteor-data
+
+> mobx-react
+
+https://github.com/mobxjs/mobx-react
+
+### AWESOME METEOR PACKAGES
+
+https://github.com/cult-of-coders
+
+### BTW
+
+> fix tracker cleanup timing by moving "tracker autorun" into "componentDidMount"
+
+https://github.com/meteor/react-packages/issues/242
