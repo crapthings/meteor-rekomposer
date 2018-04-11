@@ -1,2 +1,3 @@
 node_modules/
 dist/
+.meteor-portable-2.json

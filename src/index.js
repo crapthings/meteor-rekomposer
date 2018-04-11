@@ -24,7 +24,7 @@ let _defaults = {
   env: {},
 }
 
-export const setDefaults = defaults => Object.assign({}, _defaults, defaults)
+recompact.setDefaults = defaults => Object.assign({}, _defaults, defaults)
 
 //
 
@@ -89,4 +89,4 @@ const withTracker = (tracker, options = {}) => compose(
 
 recompact.composeWithTracker = recompact.withTracker = withTracker
 
-export default recompact
+export default { ...recompact }
