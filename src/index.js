@@ -31,7 +31,7 @@ const autoUnsub = (handler, subscriptions) => {
   for (const subscriptionId in subscriptions) {
     const subscription = subscriptions[subscriptionId]
     const { readyDeps: { _dependentsById } } = subscription
-    if (!_dependentsById.hasOwnProperty(handler._id)) continue
+    if (!_dependentsById[handler._id]) continue
     subscription.readyDeps._dependentsById[handler._id].stop()
   }
 }
@@ -43,7 +43,9 @@ const initialState = withState(WITH_STATE_PROPS[0], WITH_STATE_PROPS[1], false)
 const trackReactiveSource = (tracker, options) => lifecycle({
   componentWillReceiveProps(nextProps) {
     if (isEqual(omit(this.props, WITH_STATE_PROPS), omit(nextProps, WITH_STATE_PROPS))) return
-    this.trackerHandler = tracker(this.props, this._onData, { ..._defaults.env })
+    this.handler = Tracker.nonreactive(() => Tracker.autorun(() => {
+      this.trackerHandler = tracker(nextProps, this._onData, { ..._defaults.env })
+    }))  
   },
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -62,7 +64,7 @@ const trackReactiveSource = (tracker, options) => lifecycle({
         ? this.props._setWithTrackerState(err)
         : this.setState(nextProps, () => this.props._setWithTrackerState(true))
 
-      this.handler = Tracker.nonreactive(() => Tracker.autorun(c => {
+      this.handler = Tracker.nonreactive(() => Tracker.autorun(() => {
         this.trackerHandler = tracker(this.props, this._onData, { ..._defaults.env })
       }))
     })
